@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>React高德地图</title>
+  <script src="https://cdn.bootcss.com/react/16.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.bootcss.com/babel-standalone/6.26.0/babel.js"></script>
+  <!-- 高德地图 Geocoder 使用Web端key -->
+  <script src="http://webapi.amap.com/maps?v=1.4.0&key=*********&plugin=AMap.Geocoder"></script>
+  <script src="https://unpkg.com/react-amap@1.2.6/dist/react-amap.js"></script>
+</head>
+
+<body>
+
+  <div id="root"></div>
+  <script type="text/babel">
+
+    const { Component } = React
+
+    const Geocoder = new AMap.Geocoder()
+
+    const { Map, InfoWindow, Marker } = ReactAMAP
+
+    class App extends Component {
+      
+      constructor(props) {
+        super(props);
+        this.state = {
+          mapZoom: 30,  // 地图缩放等级 （zoom）
+
+          mapKey: '*********',  // Key
+
+          status: {
+            zoomEnable: true,   // 放大
+            dragEnable: true,   // 拖动
+          },
+
+          visible: true,        // 显示信息窗口
+
+          mapCenter: [116.397477, 39.908692],                        // 地图中心点
+          mapMake: [116.397477, 39.908692],                          // marker标记点
+          position: { longitude: 116.397477, latitude: 39.908692 },  // 信息窗口位置
+
+          offset: [0, -35],     // 信息窗口距 marker标记点位置
+
+          size: { width: 300, height: 120, },  // 信息窗口大小
+
+        };
+
+        const address = "广州市海珠区阅江西路222号"
+
+        if (Geocoder) {
+
+          Geocoder.getLocation(`${address}`, (status, result) => {
+
+            if (status === 'complete' && result.geocodes.length) {
+
+              const lnglat = result.geocodes[0].location;
+              const lat = lnglat.lat;
+              const lng = lnglat.lng;
+
+              this.setState({
+
+                mapCenter: [lng, lat],                          // 地图中心点
+                mapMake: [lng, lat],                            // marker标记点
+
+                position: { longitude: lng, latitude: lat }     // 信息窗口位置
+              })
+            } else {
+              console.log("获取地址失败")
+            }
+          });
+        }
+      }
+
+      componentDidMount() {
+
+      }
+
+      render() {
+
+        const html =
+          `<div style="background:#fff;">xxx<h3></h3>
+          <div>公司地址：</div>
+          <div>手机：</div>
+          <div>联系电话：</div>`;
+
+        let { mapCenter, mapMake, mapZoom, mapKey, status } = this.state;
+        return <div style={{ width: '100%', height: '1000px' }}>
+          <Map amapkey={mapKey} center={mapCenter} zoom={mapZoom} status={status}>
+            <InfoWindow
+              position={this.state.position}
+              visible={this.state.visible}
+              isCustom={false}
+              content={html}
+              size={this.state.size}
+              offset={this.state.offset}
+            />
+            <Marker position={mapMake} />
+          </Map>
+        </div>
+      }
+    }
+    ReactDOM.render(<App></App>, document.getElementById("root"))
+  </script>
+
+</body>
+
+</html>
